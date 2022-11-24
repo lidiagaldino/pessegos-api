@@ -1,5 +1,6 @@
 const {MESSAGE_ERROR, MESSAGE_SUCCESS} = require('../modulo/config.js')
 const produtos = require('../model/DAO/produtos.js')
+const pizzaTamanho = require('../model/DAO/produto_tamanho.js')
 
 const listarPizzas = async () => {
 
@@ -51,14 +52,25 @@ const novaPizza = async (pizza) => {
             let novaPizza = {
                 id_produto: lastId,
                 id_tamanho: pizza.id_tamanho,
+                preco: pizza.preco,
+                desconto: pizza.desconto,
                 id_tipo_pizza: pizza.id_tipo_pizza
             }
 
             const inserirPizza = await produtos.insertPizza(novaPizza)
 
             if (inserirPizza) {
-                return {status: 200, message: MESSAGE_SUCCESS.INSERT_ITEM}
+                const inserirPizzaTamanho = await pizzaTamanho.inserirProdutoTamanho(novaPizza)
+
+                if (inserirPizzaTamanho) {
+                    return {status: 200, message: MESSAGE_SUCCESS.INSERT_ITEM}
+                } else{
+                    await produtos.deleteProduto(lastId)
+                    return {status: 500, message: MESSAGE_ERROR.INTERNAL_ERROR_DB}
+                }
+                
             } else{
+                console.log('aqi')
                 await produtos.deleteProduto(lastId)
                 return {status: 500, message: MESSAGE_ERROR.INTERNAL_ERROR_DB}
             }

@@ -7,7 +7,7 @@ const insertUser = async (user) => {
 
         let sql = `insert into tbl_usuario(senha, login)
                         values( 
-                            '${user.senha}',
+                            md5('${user.senha}'),
                             '${user.login}'
                         )`;
 
@@ -30,7 +30,7 @@ const updateUser = async function (usuario) {
     
         let sql = `update tbl_usuario set
                                         login  = '${usuario.login}',
-                                        senha = '${usuario.senha}' where id = ${usuario.id}
+                                        senha = md5'${usuario.senha}' where id = ${usuario.id}
                                          `;
      
     // executa o script sql no banco de dados
@@ -73,7 +73,8 @@ const deleteUser = async (id) => {
 const selectUserById = async function (id) {
 
 
-    let sql = `select cast(id as float) as id,
+                let sql = `select  
+                                       id,
                                         login,
                                           senha
                                             from tbl_usuario

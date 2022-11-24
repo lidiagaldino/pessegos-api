@@ -72,6 +72,15 @@ app.get('/v1/produtos/tamanho', cors(), async (request, response, next) => {
     response.json(dadosTamanho)
 })
 
+app.get('/v1/usuario', cors(), async (request, response, next) => {
+ 
+    const dadosUser = await controllerUsuario.listarUsuarios()
+
+    response.status(dadosUser.status)
+    response.json(dadosUser)
+})
+
+
 // ------------- POST ------------- //
 
 app.post('/v1/produtos/pizza', cors(), jsonParser, async (request, response, next) => {
@@ -224,6 +233,35 @@ app.delete('/v1/mensagem/:id', cors(), jsonParser, async function(request, respo
     response.json(message)
 });
 
+
+app.delete('/v1/usuario/:id', cors(), jsonParser, async function(request, response){
+    let statusCode;
+    let message;
+
+            //recebe o id enviado por parametro na requisicao
+            let id = request.params.id
+
+            //validacao do ID na requisicao
+            if (id != '' && id != undefined)
+            {
+                //import do arquivo da controller de aluno
+                const controllerUsuario = require('./controller/controllerUsuario.js')
+                
+                //chama a funcao de excluir aluno
+                const deletarUser = await controllerUsuario.excluirUsuario(id);
+
+                statusCode = deletarUser.status;
+                message = deletarUser.message;
+            }else{
+                statusCode = 400;
+                message = MESSAGE_ERROR.REQUIRED_ID
+            } 
+
+
+    response.status(statusCode);
+    response.json(message)
+});
+
 // ------------- UPDATE ------------- //
 
 app.put('/v1/produtos/pizza', cors(), jsonParser, async (request, response, next) => {
@@ -256,6 +294,57 @@ app.put('/v1/produtos/pizza', cors(), jsonParser, async (request, response, next
     response.json(message)
 })
 
+app.put('/v1/usuario/:id', cors(), jsonParser, async (request, response, next) => {
+    let statusCode;
+    let message;
+    let headerContentType;
+
+    //Recebe o tipo de content type que foi enviado no header da requisicao
+    headerContentType = request.headers['content-type']
+    //console.log(headerContentType);
+
+    //validar se o content type é do tipo application/json
+    if (headerContentType == 'application/json') {
+        //recebe conteudo do corpo da mensagem
+        let dadosBody = request.body;
+        
+        //realiza um processo de conversao de dados para conseguir comparar o json vazio
+        if (JSON.stringify(dadosBody) != '{}' ) 
+        {
+            //recebe o id enviado por parametro na requisicao
+            let id = request.params.id
+
+            //validacao do ID na requisicao
+            if (id != '' && id != undefined)
+            {
+                // adiciona o id no JSON que chegou do corpo da requisicao
+                dadosBody.id = id;
+                //import do arquivo da controller de curso
+                const controllerUsuario = require('./controller/controllerUsuario.js')
+                //chama funcao novoAluno da controller e encaminha  os dados do body
+                const atualizarUser = await controllerUsuario.atualizarUser(dadosBody);
+
+                statusCode = atualizarUser.status;
+                message = atualizarUser.message;
+            }else{
+                statusCode = 400;
+                message = MESSAGE_ERROR.REQUIRED_ID
+            } 
+
+        }else{
+            statusCode = 400;
+            message = MESSAGE_ERROR.EMPTY_BODY
+        }
+
+
+    }else{
+        statusCode = 415;
+        message = MESSAGE_ERROR.CONTENT_TYPE
+    }
+
+    response.status(statusCode);
+    response.json(message)
+});
 
 app.listen(8080, function() {
     console.log('Waiting...')
