@@ -1,3 +1,22 @@
+/*****************************************************************************************************************
+ * Objetivo: API responsavel pela manipulacao de dados do back end
+    (GET, POST, PUT, DELETE)
+ * Autora: Isabelle e Lidia
+ * Data Criacao: 23/11/2022
+ * Versao: 1.0
+ * 
+ * Anotacoes:
+ 
+    //Para manipular o acesso ao BD podemos utilizar o Prisma
+    //Para instalar o prisma, devemos rodar os seguintes comandos
+    //npm install prisma --save
+    //npx prisma
+    //npx prisma init
+    //npm install @prisma/client
+ *****************************************************************************************************************/
+
+
+
 const express = require('express')
 const cors = require('cors')
 const bodyParser = require('body-parser')
@@ -79,6 +98,101 @@ app.get('/v1/usuario', cors(), async (request, response, next) => {
     response.status(dadosUser.status)
     response.json(dadosUser)
 })
+
+app.get('/v1/produtos/favoritos', cors(), async (request, response, next) => {
+ 
+    const dadosFavoritos = await controllerProdutos.listarFavoritos()
+
+    response.status(dadosFavoritos.status)
+    response.json(dadosFavoritos)
+})
+
+app.get('/v1/produtos/promocoes', cors(), async (request, response, next) => {
+ 
+    const dadosPromocoes = await controllerProdutos.listarPromocoes()
+
+    response.status(dadosPromocoes.status)
+    response.json(dadosPromocoes)
+})
+
+// ------------- GET BY ID ------------- //
+
+app.get('/v1/usuario/:id',cors(), async function (request, response) {
+
+    let id = request.params.id
+    let statusCode
+    let message
+
+    if (id != '' && id != undefined) {
+        const dadosUser = await controllerUsuario.buscarUser(id)
+
+        if (dadosUser) {
+            statusCode = dadosUser.status
+            message = dadosUser.message
+        } else{
+            statusCode = 404
+            message = MESSAGE_ERROR.NOT_FOUND_DB
+        }
+    } else{
+        statusCode = 400
+        message = MESSAGE_ERROR.REQUIRED_ID
+    }
+
+    response.json(message)
+    response.status(statusCode)
+})
+
+
+app.get('/v1/produtos/pizza/:id',cors(), async function (request, response) {
+
+    let id = request.params.id
+    let statusCode
+    let message
+
+    if (id != '' && id != undefined) {
+        const dadosPizza = await controllerProdutos.buscarPizza(id)
+
+        if (dadosPizza) {
+            statusCode = dadosPizza.status
+            message = dadosPizza.message
+        } else{
+            statusCode = 404
+            message = MESSAGE_ERROR.NOT_FOUND_DB
+        }
+    } else{
+        statusCode = 400
+        message = MESSAGE_ERROR.REQUIRED_ID
+    }
+
+    response.json(message)
+    response.status(statusCode)
+})
+
+app.get('/v1/produtos/bebida/:id',cors(), async function (request, response) {
+
+    let id = request.params.id
+    let statusCode
+    let message
+
+    if (id != '' && id != undefined) {
+        const dadosBebida = await controllerProdutos.buscarBebida(id)
+
+        if (dadosBebida) {
+            statusCode = dadosBebida.status
+            message = dadosBebida.message
+        } else{
+            statusCode = 404
+            message = MESSAGE_ERROR.NOT_FOUND_DB
+        }
+    } else{
+        statusCode = 400
+        message = MESSAGE_ERROR.REQUIRED_ID
+    }
+
+    response.json(message)
+    response.status(statusCode)
+})
+
 
 
 // ------------- POST ------------- //
@@ -262,25 +376,100 @@ app.delete('/v1/usuario/:id', cors(), jsonParser, async function(request, respon
     response.json(message)
 });
 
+app.delete('/v1/produtos/bebida/:id', cors(), jsonParser, async function(request, response){
+    let statusCode;
+    let message;
+
+    let id = request.params.id
+
+    if (id != '' && id != undefined){
+
+        const deleteBebida = await controllerProdutos.deletarBebida(id);
+
+        statusCode = deleteBebida.status
+        message = deleteBebida.message
+
+    }else{
+        statusCode = 400;
+        message = MESSAGE_ERROR.REQUIRED_ID
+    } 
+
+
+    response.status(statusCode);
+    response.json(message)
+});
+
 // ------------- UPDATE ------------- //
 
-app.put('/v1/produtos/pizza', cors(), jsonParser, async (request, response, next) => {
+app.put('/v1/produtos/pizza/:id', cors(), jsonParser, async (request, response, next) => {
 
     let statusCode
     let message
 
     let headerContentType = request.headers['content-type']
+    let id = request.params.id
 
     if (headerContentType == 'application/json') {
         
         let dadosBody = request.body
 
         if (JSON.stringify(dadosBody) != '{}') {
-             
-            const atualizarPizza = await controllerProdutos.atualizarPizza(dadosBody)
 
-            statusCode = atualizarPizza.status
-            message = atualizarPizza.message
+            if (id != undefined && id != '') {
+
+                dadosBody.id_pizza = id
+
+                const atualizarPizza = await controllerProdutos.atualizarPizza(dadosBody)
+
+                statusCode = atualizarPizza.status
+                message = atualizarPizza.message
+            } else{
+                statusCode = 400
+                message = MESSAGE_ERROR.REQUIRED_ID
+            }
+             
+            
+        } else{
+            statusCode = 400
+            message = MESSAGE_ERROR.EMPTY_BODY
+        }
+    } else{
+        statusCode = 415
+        message = MESSAGE_ERROR.CONTENT_TYPE
+    }
+
+    response.status(statusCode)
+    response.json(message)
+})
+
+app.put('/v1/produtos/bebida/:id', cors(), jsonParser, async (request, response, next) => {
+
+    let statusCode
+    let message
+
+    let headerContentType = request.headers['content-type']
+    let id = request.params.id
+
+    if (headerContentType == 'application/json') {
+        
+        let dadosBody = request.body
+
+        if (JSON.stringify(dadosBody) != '{}') {
+
+            if (id != undefined && id != '') {
+
+                dadosBody.id_bebida = id
+
+                const atualizarBebida = await controllerProdutos.atualizarBebida(dadosBody)
+
+                statusCode = atualizarBebida.status
+                message = atualizarBebida.message
+            } else{
+                statusCode = 400
+                message = MESSAGE_ERROR.REQUIRED_ID
+            }
+             
+            
         } else{
             statusCode = 400
             message = MESSAGE_ERROR.EMPTY_BODY
@@ -322,7 +511,7 @@ app.put('/v1/usuario/:id', cors(), jsonParser, async (request, response, next) =
                 //import do arquivo da controller de curso
                 const controllerUsuario = require('./controller/controllerUsuario.js')
                 //chama funcao novoAluno da controller e encaminha  os dados do body
-                const atualizarUser = await controllerUsuario.atualizarUser(dadosBody);
+                const atualizarUser = await controllerUsuario.updateUser(dadosBody);
 
                 statusCode = atualizarUser.status;
                 message = atualizarUser.message;

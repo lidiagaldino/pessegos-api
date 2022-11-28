@@ -1,9 +1,17 @@
+/*****************************************************************************************************************
+ * Objetivo: Arquivo responsavel pela manipulacao de recebimento, tratamento e retorno de dados entre a API e a model 
+ * Autora: Isabelle e Lidia
+ * Data Criacao: 23/11/2022
+ * Versao: 1.0
+ *****************************************************************************************************************/
+
+
 const { PrismaClient } = require('@prisma/client')
 const prisma = new PrismaClient()
 
 const selectAllPizzas = async () => {
 
-    const sql = `select tbl_tamanho.nome as tamanho, round(tbl_produto_tamanho.preco, 2) as preco, tbl_produto_tamanho.desconto, tbl_produto.nome, tbl_produto.descricao, tbl_produto.imagem, tbl_tipo_pizza.tipo, tbl_produto.id from tbl_produto
+    const sql = `select tbl_tamanho.nome as tamanho, round(tbl_produto_tamanho.preco, 2) as preco, tbl_produto_tamanho.desconto, tbl_produto.nome, tbl_produto.descricao, tbl_produto.imagem, tbl_tipo_pizza.tipo, tbl_produto.id as id_produto, tbl_pizza.id as id_pizza from tbl_produto
 	inner join tbl_pizza on tbl_produto.id = tbl_pizza.id_produto
     inner join tbl_produto_tamanho on tbl_produto_tamanho.id_produto = tbl_produto.id
     inner join tbl_tamanho on tbl_tamanho.id = tbl_produto_tamanho.id_tamanho
@@ -20,7 +28,7 @@ const selectAllPizzas = async () => {
 
 const selectAllBebidas = async () => {
 
-    const sql = `select tbl_tamanho.nome as tamanho, round(tbl_produto_tamanho.preco,2) as preco, tbl_produto_tamanho.desconto, tbl_produto.nome, tbl_produto.descricao, tbl_produto.imagem, tbl_tipo_bebida.tipo, tbl_produto.id from tbl_produto
+    const sql = `select tbl_tamanho.nome as tamanho, round(tbl_produto_tamanho.preco,2) as preco, tbl_produto_tamanho.desconto, tbl_produto.nome, tbl_produto.descricao, tbl_produto.imagem, tbl_tipo_bebida.tipo, tbl_produto.id as id_produto, tbl_bebida.id as id_bebida from tbl_produto
 	inner join tbl_bebida on tbl_produto.id = tbl_bebida.id_produto
     inner join tbl_produto_tamanho on tbl_produto_tamanho.id_produto = tbl_produto.id
     inner join tbl_tamanho on tbl_tamanho.id = tbl_produto_tamanho.id_tamanho
@@ -59,7 +67,7 @@ const updateProduto = async (produto) => {
 
      try {
         
-        const sql = `update tbl_produto set nome = '${produto.nome}', preco = ${produto.preco}, descricao = '${produto.descricao}', imagem = '${produto.imagem}', desconto = ${produto.desconto} where id = ${produto.id_produto}`
+        const sql = `update tbl_produto set nome = '${produto.nome}', descricao = '${produto.descricao}', imagem = '${produto.imagem}' where id = ${produto.id_produto}`
 
         const result = await prisma.$executeRawUnsafe(sql)
 
@@ -72,6 +80,25 @@ const updateProduto = async (produto) => {
      } catch (error) {
         return false
      }
+}
+
+const updateTamanho = async (produto) => {
+
+    try {
+        
+        const sql = `update tbl_produto_tamanho set preco = ${produto.preco}, desconto = ${produto.desconto}, id_produto = ${produto.id_produto}, id_tamanho = ${produto.id_tamanho} where id = ${produto.id_tamanho_pizza}`
+
+        const result = await prisma.$executeRawUnsafe(sql)
+
+        if(result){
+            return true
+        } else{
+            return false
+        }
+
+    } catch (error) {
+        return false
+    }
 }
 
 const deleteProduto = async (id) => {
@@ -116,7 +143,7 @@ const updatePizza = async (pizza) => {
 
     try {
         
-        const sql = `update tbl_pizza set id_produto = ${pizza.id_produto}, id_tipo_pizza = ${pizza.id_tipo_pizza}, id_tamanho = ${pizza.id_tamanho} where id = ${pizza.id_pizza}`
+        const sql = `update tbl_pizza set id_produto = ${pizza.id_produto}, id_tipo_pizza = ${pizza.id_tipo_pizza} where id = ${pizza.id_pizza}`
 
         const result = await prisma.$executeRawUnsafe(sql)
 
@@ -131,12 +158,31 @@ const updatePizza = async (pizza) => {
     }
 }
 
+const updateBebida = async (bebida) => {
+
+    try {
+        
+        const sql = `update tbl_bebida set id_produto = ${bebida.id_produto}, id_tipo_bebida = ${bebida.id_tipo_bebida}, teor_alcoolico = ${bebida.teor_alcoolico} where id = ${bebida.id_bebida}`
+        const result = await prisma.$executeRawUnsafe(sql)
+
+        if (result) {
+            return true
+        }else{
+            return false
+        }
+
+
+    } catch (error) {
+        return false
+    }
+}
+
 const insertBebida = async (bebida) => {
 
     try {
         
-        const sql = `insert into tbl_bebida(id_produto, id_tipo_bebida, id_tamanho, teor_alcoolico) 
-                        values(${bebida.id_produto}, ${bebida.id_tipo_pizza}, ${bebida.id_tamanho}, ${bebida.teor_alcoolico})`
+        const sql = `insert into tbl_bebida(id_produto, id_tipo_bebida, teor_alcoolico) 
+                        values(${bebida.id_produto}, ${bebida.id_tipo_bebida}, ${bebida.teor_alcoolico})`
 
         const result = await prisma.$executeRawUnsafe(sql)
 
@@ -153,10 +199,11 @@ const insertBebida = async (bebida) => {
 
 const selectPizzaById = async (id) => {
 
-    const sql = `select tbl_produto.nome, tbl_produto.imagem, tbl_produto.descricao, tbl_produto.desconto, tbl_produto.favoritos, round(tbl_produto.preco, 2) as preco, tbl_tamanho.nome as tamamho, tbl_tipo_pizza.tipo  
+    const sql = `select tbl_produto.nome, tbl_produto.imagem, tbl_produto.descricao, tbl_produto_tamanho.desconto, tbl_produto.favoritos, round(tbl_produto_tamanho.preco, 2) as preco, tbl_tamanho.nome as tamanho, tbl_tipo_pizza.tipo, tbl_pizza.id as id_pizza, tbl_produto.id as id_produto, tbl_produto_tamanho.id as id_tamanho  
     from tbl_pizza 
         inner join tbl_produto on tbl_pizza.id_produto = tbl_produto.id 
-        inner join tbl_tamanho on tbl_tamanho.id = tbl_pizza.id_tamanho 
+        inner join tbl_produto_tamanho on tbl_produto_tamanho.id_produto = tbl_produto.id
+        inner join tbl_tamanho on tbl_tamanho.id = tbl_produto_tamanho.id_tamanho
         inner join tbl_tipo_pizza on tbl_tipo_pizza.id = tbl_pizza.id_tipo_pizza 
     where tbl_pizza.id = ${id}`
 
@@ -164,6 +211,25 @@ const selectPizzaById = async (id) => {
 
     if(rsPizza.length > 0){
         return rsPizza
+    } else{
+        return false
+    }
+}
+
+const selectBebidaById = async (id) => {
+
+    const sql = `select tbl_produto.nome, tbl_produto.imagem, tbl_produto.descricao, tbl_produto_tamanho.desconto, tbl_produto.favoritos, round(tbl_produto_tamanho.preco, 2) as preco, tbl_tamanho.nome as tamanho, tbl_tipo_bebida.tipo, tbl_bebida.id as id_bebida, tbl_produto.id as id_produto, tbl_produto_tamanho.id as id_tamanho  
+    from tbl_bebida 
+        inner join tbl_produto on tbl_bebida.id_produto = tbl_produto.id 
+        inner join tbl_produto_tamanho on tbl_produto_tamanho.id_produto = tbl_produto.id
+        inner join tbl_tamanho on tbl_tamanho.id = tbl_produto_tamanho.id_tamanho
+        inner join tbl_tipo_bebida on tbl_tipo_bebida.id = tbl_bebida.id_tipo_bebida
+    where tbl_bebida.id = ${id};`
+
+    const rsBebida = await prisma.$queryRawUnsafe(sql)
+
+    if(rsBebida.length > 0){
+        return rsBebida
     } else{
         return false
     }
@@ -182,6 +248,53 @@ const selectLastIdProduto = async () => {
     }
 }
 
+const selectFavoritos = async () => {
+
+    const sql = `select tbl_produto.nome, tbl_produto.imagem, tbl_produto.descricao, tbl_produto_tamanho.desconto, tbl_produto.favoritos, round(tbl_produto_tamanho.preco, 2) as preco, tbl_tamanho.nome as tamanho
+    from tbl_produto 
+        inner join tbl_produto_tamanho on tbl_produto_tamanho.id_produto = tbl_produto.id
+        inner join tbl_tamanho on tbl_tamanho.id = tbl_produto_tamanho.id_tamanho 
+    where tbl_produto.favoritos > 0 order by tbl_produto.favoritos desc limit 10;`
+
+    const rsFavoritos = await prisma.$queryRawUnsafe(sql)
+
+    if (rsFavoritos.length > 0) {
+        return rsFavoritos
+    } else{
+        return false
+    }
+}
+
+const selectPromocoes = async () => {
+
+    const sql = `select tbl_produto.nome, tbl_produto.imagem, tbl_produto.descricao, tbl_produto_tamanho.desconto, tbl_produto.favoritos, round(tbl_produto_tamanho.preco, 2) as preco, tbl_tamanho.nome as tamanho, round(tbl_produto_tamanho.preco - (tbl_produto_tamanho.preco / tbl_produto_tamanho.desconto), 2) as preco_desconto
+    from tbl_produto 
+        inner join tbl_produto_tamanho on tbl_produto_tamanho.id_produto = tbl_produto.id
+        inner join tbl_tamanho on tbl_tamanho.id = tbl_produto_tamanho.id_tamanho 
+    where tbl_produto_tamanho.desconto > 0 order by tbl_produto_tamanho.desconto desc limit 20;`
+
+    const rsPromocoes = await prisma.$queryRawUnsafe(sql)
+
+    if (rsPromocoes.length > 0) {
+        return rsPromocoes
+    } else{
+        return false
+    }
+}
+
+const deleteBebida = async (id) => {
+
+    const sql = `delete from tbl_bebida where id = ${id}`
+
+    const result = await prisma.$executeRawUnsafe(sql)
+
+    if (result) {
+        return true
+    } else{
+        return false
+    }
+}
+
 module.exports = {
     selectAllPizzas,
     selectAllBebidas,
@@ -192,5 +305,11 @@ module.exports = {
     insertBebida,
     updatePizza,
     selectPizzaById,
-    updateProduto
+    updateProduto,
+    updateTamanho,
+    selectBebidaById,
+    updateBebida,
+    selectFavoritos,
+    selectPromocoes,
+    deleteBebida
 }

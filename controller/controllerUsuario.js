@@ -1,3 +1,12 @@
+/*****************************************************************************************************************
+ * Objetivo: Arquivo responsavel pela manipulacao de recebimento, tratamento e retorno de dados entre a API e a model 
+ * Autora: Isabelle e Lidia
+ * Data Criacao: 23/11/2022
+ * Versao: 1.0
+ * 
+ *****************************************************************************************************************/
+
+
 const {MESSAGE_ERROR, MESSAGE_SUCCESS} = require('../modulo/config.js')
 const newUser = require('../model/DAO/usuario.js');
 
@@ -49,9 +58,8 @@ const updateUser = async (user) => {
         }
         else 
         {
-            const atualizarUser = require ('../model/DAO/usuario.js');
 
-            const result = await atualizarUser.updateUser(id)
+            const result = await newUser.updateUser(user)
 
             if (result) {
                 return {status: 201, message: MESSAGE_SUCCESS.UPDATE_ITEM};
@@ -69,10 +77,9 @@ const excluirUsuario = async (id) => {
     const usuario = await newUser.selectUserById(id)
 
     if(usuario) {
-        const deletarUser = require('../model/DAO/mensagens.js')
 
          //funcao para deletar um curso
-         const result = await deletarUser.deleteMessage(id);
+         const result = await newUser.deleteUser(id);
  
          if (result) {
              return {status: 201, message: MESSAGE_SUCCESS.DELETE_ITEM};
@@ -85,9 +92,24 @@ const excluirUsuario = async (id) => {
 }
 
 
+const buscarUser = async function (id) {
+    if (id == undefined || id == '') {
+        return {status: 400, message: MESSAGE_ERROR.REQUIRED_ID}
+    }
+
+    const dadosUser = await newUser.selectUserById(id)
+
+    if (dadosUser) {
+        return {status: 200, message: dadosUser}
+    } else{
+        return false
+    }
+}
+
 module.exports = {
     listarUsuarios,
     novoUser,
     excluirUsuario,
-    updateUser
+    updateUser,
+    buscarUser
 }
