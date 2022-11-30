@@ -12,9 +12,6 @@ const prisma = new PrismaClient()
 const insertMessages = async (mensagem) => {
     try {
 
-        const { PrismaClient } = require('@prisma/client')
-
-        const prisma = new PrismaClient();
 
         let sql = `insert into tbl_mensagem(texto, nome, email)
                         values( 
@@ -22,17 +19,16 @@ const insertMessages = async (mensagem) => {
                             '${mensagem.nome}',
                             '${mensagem.email}'
                         )`;
+        const result = await prisma.$executeRawUnsafe (sql);
 
-const result = await prisma.$executeRawUnsafe (sql);
+        if (result) {
+            return true;
+        }else
+            return false;
 
-if (result) {
-    return true;
-}else
-    return false;
-
-} catch (error) {
-    return false;
-}
+        } catch (error) {
+            return false;
+        }
 
 }
 
@@ -40,51 +36,21 @@ const deleteMessage = async (id) => {
 
     try {
 
-        const { PrismaClient } = require('@prisma/client')
-
-        const prisma = new PrismaClient();
-
         let sql = `delete from tbl_mensagem
                                 where id = '${id}'`;
 
- const result = await prisma.$executeRawUnsafe (sql);
+        const result = await prisma.$executeRawUnsafe (sql);
     
-// verifica se o script foi executado com sucesso no BD
-    if (result) {
-        return true;
-    }else
-        return false;
+        if (result) {
+            return true;
+        }else
+            return false;
                                 
-    } catch (error) {
-        return false;
-    }
+        } catch (error) {
+            return false;
+        }
                             
 }
-
-const  selectMessageById = async function (id) {
-
-    //Import da classe prismaClient, que é responsavel pelas interacoes com o BD
-    const { PrismaClient } = require('@prisma/client')
-
-    //instancia da classe PrismaClient
-    const prisma = new PrismaClient();
-
-    let sql = `select cast(id as float) as id,
-                                        nome,
-                                         email,
-                                          texto
-                                            from tbl_mensagem
-                                                  where id = ${id}`;
-
-    //Criamos um objeto de tipo RecordSet (rsAlunos) para receber os dados de BD atraves do script SQL (select)
-    const rsMensagem = await prisma.$queryRawUnsafe(sql)
-
-    if (rsMensagem.length > 0)
-        return rsMensagem;
-    else 
-        return false;
-}
-
 
 
 const selectAllMessages = async () => {
@@ -104,5 +70,4 @@ module.exports = {
     selectAllMessages,
     insertMessages,
     deleteMessage,
-    selectMessageById
 }
