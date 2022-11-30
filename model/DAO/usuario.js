@@ -55,7 +55,6 @@ const updateUser = async function (usuario) {
         }
 }
 
-
 const deleteUser = async (id) => {
 
     try {
@@ -98,7 +97,6 @@ const selectUserById = async function (id) {
         return false;
 }
 
-
 const selectAllUsers = async () => {
 
     const sql = `select * from tbl_usuario order by id desc`
@@ -112,10 +110,37 @@ const selectAllUsers = async () => {
     }
 }
 
+const autenticateUser = async (user) => {
+
+    const sql = `select * from tbl_usuario where senha = md5('${user.senha}') and login = '${user.login}'`
+
+    const result = await prisma.$queryRawUnsafe(sql)
+
+    if (result.length > 0) {
+        return true
+    } else{
+        return false
+    }
+}
+
+const searchLogin = async (login) => {
+
+    const sql = `select * from tbl_usuario where login = '${login}'`
+
+    const result = await prisma.$queryRawUnsafe(sql)
+
+    if (result.length > 0) {
+        return true
+    } else{
+        return false
+    }
+}
 module.exports = {
     selectAllUsers,
     insertUser,
     deleteUser,
     selectUserById,
-    updateUser
+    updateUser,
+    autenticateUser,
+    searchLogin
 }

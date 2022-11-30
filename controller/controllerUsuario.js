@@ -29,23 +29,25 @@ const listarUsuarios = async () => {
 
 const novoUser = async (user) => {
 
-    //validacao de campos obrigatórios  
     if (user.login == undefined || user.login == '' || user.senha == '' || user.senha == undefined ) {
         return {status:400, message: MESSAGE_ERROR.REQUIRED_FIELDS};
-
     }
-    else
-    {
 
-        //chama funcao para inserir um  novo user
+    const verificar = await newUser.searchLogin(user.login)
+
+    if (!verificar) {
         const resultNewUser = await newUser.insertUser(user);
 
         if (resultNewUser) {
             return {status: 201, message: MESSAGE_SUCCESS.INSERT_ITEM};
-        } else 
+        } else {
             return {status: 500, message: MESSAGE_ERROR.INTERNAL_ERROR_DB};
-      }
-
+        }
+    } else{
+        return {status: 400, message: MESSAGE_ERROR.EXISTING_USER}
+    }
+    
+        
 }
 
 const updateUser = async (user) => {
@@ -106,10 +108,25 @@ const buscarUser = async function (id) {
     }
 }
 
+const autenticar = async function (user) {
+    if (user.senha == undefined || user.senha == '' || user.login == undefined || user.senha == '') {
+        return {status: 400, message: MESSAGE_ERROR.REQUIRED_FIELDS}
+    }
+
+    const autenticacao = await newUser.autenticateUser(user)
+
+    if (autenticacao) {
+        return {status: 200, message: MESSAGE_SUCCESS.AUTENTICATE_SUCCESS}
+    } else{
+        return {status: 404, message: MESSAGE_ERROR.AUTENTICATE_ERROR}
+    }
+}
+
 module.exports = {
     listarUsuarios,
     novoUser,
     excluirUsuario,
     updateUser,
-    buscarUser
+    buscarUser,
+    autenticar
 }

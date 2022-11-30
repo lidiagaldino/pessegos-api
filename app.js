@@ -115,6 +115,36 @@ app.get('/v1/produtos/promocoes', cors(), async (request, response, next) => {
     response.json(dadosPromocoes)
 })
 
+app.post('/v1/user/login', cors(), jsonParser, async (request, response, next) => {
+ 
+    let headerContentType = request.headers['content-type']
+    let statusCode
+    let message
+
+    if (headerContentType == 'application/json') {
+        
+        let dadosBody = request.body
+
+        if (JSON.stringify(dadosBody) != '{}') {
+            const dadosUser = await controllerUsuario.autenticar(dadosBody)
+
+            statusCode = dadosUser.status
+            message = dadosUser.message
+
+        } else{
+            statusCode = 400
+            message = MESSAGE_ERROR.EMPTY_BODY
+        }
+    }else{
+        statusCode = 415
+        message = MESSAGE_ERROR.CONTENT_TYPE
+    }
+    
+    response.status(statusCode)
+    response.json(message)
+
+})
+
 // ------------- GET BY ID ------------- //
 
 app.get('/v1/usuario/:id',cors(), async function (request, response) {

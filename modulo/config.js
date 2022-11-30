@@ -13,13 +13,16 @@
     EMPTY_BODY          : 'O body da requisição não pode ser vazio!',
     NOT_FOUND_DB        : 'Não foram encontrados registros no banco de dados',
     INTERNAL_ERROR_DB   : 'Não foi possivel realizar a operação com o banco de dados',
-    REQUIRED_ID         : 'O id do registro é obrigatório nesse tipo de requisição'
+    REQUIRED_ID         : 'O id do registro é obrigatório nesse tipo de requisição',
+    AUTENTICATE_ERROR   : 'Senha ou login estão incorretos',
+    EXISTING_USER       : 'Este usuário já existe'
 }
 
 const MESSAGE_SUCCESS = {
     INSERT_ITEM     : 'Item criado com sucesso no Banco de Dados',
     UPDATE_ITEM     : 'Item atualizado com sucesso no Banco de Dados',
-    DELETE_ITEM     : 'Item deletado com sucesso no Banco de Dados'
+    DELETE_ITEM     : 'Item deletado com sucesso no Banco de Dados',
+    AUTENTICATE_SUCCESS : 'Usuário autenticado com sucesso'
 }
 
 module.exports = {
