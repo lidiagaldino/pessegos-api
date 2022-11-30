@@ -376,7 +376,7 @@ app.delete('/v1/usuario/:id', cors(), jsonParser, async function(request, respon
     response.json(message)
 });
 
-app.delete('/v1/produtos/bebida/:id', cors(), jsonParser, async function(request, response){
+app.put('/v1/produtos/:id', cors(), jsonParser, async function(request, response){
     let statusCode;
     let message;
 
@@ -384,10 +384,10 @@ app.delete('/v1/produtos/bebida/:id', cors(), jsonParser, async function(request
 
     if (id != '' && id != undefined){
 
-        const deleteBebida = await controllerProdutos.deletarBebida(id);
+        const deleteProduto = await controllerProdutos.deletarProduto(id);
 
-        statusCode = deleteBebida.status
-        message = deleteBebida.message
+        statusCode = deleteProduto.status
+        message = deleteProduto.message
 
     }else{
         statusCode = 400;

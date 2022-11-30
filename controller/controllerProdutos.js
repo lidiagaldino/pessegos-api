@@ -245,38 +245,24 @@ const listarPromocoes = async () => {
     return dadosPromocoesJSON
 }
 
-const deletarBebida = async (id) => {
+const deletarProduto = async (id) => {
 
     if (id == undefined || id == '') {
         return {status: 400, message: MESSAGE_ERROR.REQUIRED_ID}
     }
 
-    const verificar = await produtos.selectBebidaById(id)
+    const verificar = await produtos.selectProdutoById(id)
 
     if (verificar) {
         
-        const deleteBebida = await produtos.deleteBebida(id)
+        const deleteProduto = await produtos.deletarProdutoUpdate(id)
 
-        if (deleteBebida) {
-            const deleteTamanhoProduto = await pizzaTamanho.deleteProdutoTamanho(verificar.id_tamanho)
-
-            if (deleteTamanhoProduto) {
-                
-                console.log('oi')
-                const deleteProduto = await produtos.deleteProduto(verificar.id_produto)
-
-                if (deleteProduto) {
-                    
-                    return {status: 200, message: MESSAGE_SUCCESS.DELETE_ITEM}
-                } else{
-                    return {status: 500, message: MESSAGE_ERROR.INTERNAL_ERROR_DB}
-                }
-            }else{
-                return {status: 500, message: MESSAGE_ERROR.INTERNAL_ERROR_DB}
-            }
-        }else{
+        if (deleteProduto) {
+            return {status: 200, message: MESSAGE_SUCCESS.DELETE_ITEM}
+        } else{
             return {status: 500, message: MESSAGE_ERROR.INTERNAL_ERROR_DB}
         }
+        
     } else{
         return {status: 404, message: MESSAGE_ERROR.NOT_FOUND_DB}
     }
@@ -293,5 +279,5 @@ module.exports = {
     atualizarBebida,
     listarFavoritos,
     listarPromocoes,
-    deletarBebida
+    deletarProduto
 }

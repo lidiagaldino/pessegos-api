@@ -15,7 +15,8 @@ const selectAllPizzas = async () => {
 	inner join tbl_pizza on tbl_produto.id = tbl_pizza.id_produto
     inner join tbl_produto_tamanho on tbl_produto_tamanho.id_produto = tbl_produto.id
     inner join tbl_tamanho on tbl_tamanho.id = tbl_produto_tamanho.id_tamanho
-    inner join tbl_tipo_pizza on tbl_tipo_pizza.id = tbl_pizza.id_tipo_pizza;`
+    inner join tbl_tipo_pizza on tbl_tipo_pizza.id = tbl_pizza.id_tipo_pizza
+    where tbl_produto.ativo = true;`
 
     const rsPizza = await prisma.$queryRawUnsafe(sql)
 
@@ -32,7 +33,8 @@ const selectAllBebidas = async () => {
 	inner join tbl_bebida on tbl_produto.id = tbl_bebida.id_produto
     inner join tbl_produto_tamanho on tbl_produto_tamanho.id_produto = tbl_produto.id
     inner join tbl_tamanho on tbl_tamanho.id = tbl_produto_tamanho.id_tamanho
-    inner join tbl_tipo_bebida on tbl_tipo_bebida.id = tbl_bebida.id_tipo_bebida;`
+    inner join tbl_tipo_bebida on tbl_tipo_bebida.id = tbl_bebida.id_tipo_bebida
+    where tbl_produto.ativo = true;`
 
     const rsPizza = await prisma.$queryRawUnsafe(sql)
 
@@ -47,8 +49,8 @@ const insertProduto = async (produto) => {
 
     try{
 
-        const sql = `insert into tbl_produto(nome, descricao, imagem)
-                            values('${produto.nome}', '${produto.descricao}', '${produto.imagem}')`
+        const sql = `insert into tbl_produto(nome, descricao, imagem, ativo)
+                            values('${produto.nome}', '${produto.descricao}', '${produto.imagem}', true)`
 
         const result = await prisma.$executeRawUnsafe(sql)
 
@@ -118,7 +120,7 @@ const deleteProduto = async (id) => {
     } catch (error) {
         return false
     }
-} // TERMINAR
+}
 
 const insertPizza = async (pizza) => {
 
@@ -282,11 +284,24 @@ const selectPromocoes = async () => {
     }
 }
 
-const deleteBebida = async (id) => {
+const deletarProdutoUpdate = async (id) => {
 
-    const sql = `delete from tbl_bebida where id = ${id}`
+    const sql = `update tbl_produto set ativo = false where id = ${id}`
 
     const result = await prisma.$executeRawUnsafe(sql)
+
+    if (result) {
+        return true
+    } else{
+        return false
+    }
+}
+
+const selectProdutoById = async (id) => {
+
+    const sql = `select * from tbl_produto where id = ${id}`
+
+    const result = prisma.$executeRawUnsafe(sql)
 
     if (result) {
         return true
@@ -311,5 +326,6 @@ module.exports = {
     updateBebida,
     selectFavoritos,
     selectPromocoes,
-    deleteBebida
+    deletarProdutoUpdate,
+    selectProdutoById
 }
