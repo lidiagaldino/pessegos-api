@@ -564,6 +564,30 @@ app.put('/v1/usuario/:id', cors(), jsonParser, async (request, response, next) =
     response.json(message)
 });
 
+app.put('/v1/produtos/favoritos/:id', cors(), jsonParser, async (request, response, next) => {
+
+    let statusCode
+    let message
+
+    let id = request.params.id
+
+    if (id != undefined && id != '') {
+
+        const atualizarBebida = await controllerProdutos.adicionarFavorito(id)
+
+        statusCode = atualizarBebida.status
+        message = atualizarBebida.message
+    } else{
+        statusCode = 400
+        message = MESSAGE_ERROR.REQUIRED_ID
+    }
+             
+            
+
+    response.status(statusCode)
+    response.json(message)
+})
+
 app.listen(8080, function() {
     console.log('Waiting...')
 })

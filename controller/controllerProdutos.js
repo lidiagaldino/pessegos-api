@@ -268,6 +268,28 @@ const deletarProduto = async (id) => {
     }
 }
 
+const adicionarFavorito = async (id) => {
+
+    if (id == undefined || id == '') {
+        return {status: 400, message: MESSAGE_ERROR.REQUIRED_ID}
+    }
+
+    const verificar = await produtos.selectProdutoById(id)
+
+    if (verificar) {
+        
+        const adicionar = await produtos.addFavorite(id, verificar[0].favoritos)
+
+        if (adicionar) {
+            return {status: 200, message: MESSAGE_SUCCESS.UPDATE_ITEM}
+        } else{
+            return {status: 500, message: MESSAGE_ERROR.INTERNAL_ERROR_DB}
+        }
+    }else{
+        return {status: 404, message: MESSAGE_ERROR.NOT_FOUND_DB}
+    }
+}
+
 module.exports = {
     listarPizzas,
     listarBebidas,
@@ -279,5 +301,6 @@ module.exports = {
     atualizarBebida,
     listarFavoritos,
     listarPromocoes,
-    deletarProduto
+    deletarProduto,
+    adicionarFavorito
 }

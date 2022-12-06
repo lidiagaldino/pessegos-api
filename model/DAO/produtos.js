@@ -11,7 +11,7 @@ const prisma = new PrismaClient()
 
 const selectAllPizzas = async () => {
 
-    const sql = `select tbl_tamanho.nome as tamanho, round(tbl_produto_tamanho.preco, 2) as preco, tbl_produto_tamanho.desconto, tbl_produto.nome, tbl_produto.descricao, tbl_produto.imagem, tbl_tipo_pizza.tipo, tbl_produto.id as id_produto, tbl_pizza.id as id_pizza from tbl_produto
+    const sql = `select tbl_tamanho.nome as tamanho, tbl_produto.favoritos, round(tbl_produto_tamanho.preco, 2) as preco, tbl_produto_tamanho.desconto, tbl_produto.nome, tbl_produto.descricao, tbl_produto.imagem, tbl_tipo_pizza.tipo, tbl_produto.id as id_produto, tbl_pizza.id as id_pizza from tbl_produto
 	inner join tbl_pizza on tbl_produto.id = tbl_pizza.id_produto
     inner join tbl_produto_tamanho on tbl_produto_tamanho.id_produto = tbl_produto.id
     inner join tbl_tamanho on tbl_tamanho.id = tbl_produto_tamanho.id_tamanho
@@ -29,7 +29,7 @@ const selectAllPizzas = async () => {
 
 const selectAllBebidas = async () => {
 
-    const sql = `select tbl_tamanho.nome as tamanho, round(tbl_produto_tamanho.preco,2) as preco, tbl_produto_tamanho.desconto, tbl_produto.nome, tbl_produto.descricao, tbl_produto.imagem, tbl_tipo_bebida.tipo, tbl_produto.id as id_produto, tbl_bebida.id as id_bebida from tbl_produto
+    const sql = `select tbl_tamanho.nome as tamanho, tbl_produto.favoritos, round(tbl_produto_tamanho.preco,2) as preco, tbl_produto_tamanho.desconto, tbl_produto.nome, tbl_produto.descricao, tbl_produto.imagem, tbl_tipo_bebida.tipo, tbl_produto.id as id_produto, tbl_bebida.id as id_bebida, tbl_bebida.teor_alcoolico from tbl_produto
 	inner join tbl_bebida on tbl_produto.id = tbl_bebida.id_produto
     inner join tbl_produto_tamanho on tbl_produto_tamanho.id_produto = tbl_produto.id
     inner join tbl_tamanho on tbl_tamanho.id = tbl_produto_tamanho.id_tamanho
@@ -49,8 +49,8 @@ const insertProduto = async (produto) => {
 
     try{
 
-        const sql = `insert into tbl_produto(nome, descricao, imagem, ativo)
-                            values('${produto.nome}', '${produto.descricao}', '${produto.imagem}', true)`
+        const sql = `insert into tbl_produto(nome, descricao, imagem, ativo, favoritos)
+                            values('${produto.nome}', '${produto.descricao}', '${produto.imagem}', true, 0)`
 
         const result = await prisma.$executeRawUnsafe(sql)
 
@@ -256,7 +256,8 @@ const selectFavoritos = async () => {
     from tbl_produto 
         inner join tbl_produto_tamanho on tbl_produto_tamanho.id_produto = tbl_produto.id
         inner join tbl_tamanho on tbl_tamanho.id = tbl_produto_tamanho.id_tamanho 
-    where tbl_produto.favoritos > 0 order by tbl_produto.favoritos desc limit 10;`
+    where tbl_produto.favoritos > 0 and tbl_produto.ativo = true order by tbl_produto.favoritos desc limit 10
+    `
 
     const rsFavoritos = await prisma.$queryRawUnsafe(sql)
 
@@ -273,7 +274,7 @@ const selectPromocoes = async () => {
     from tbl_produto 
         inner join tbl_produto_tamanho on tbl_produto_tamanho.id_produto = tbl_produto.id
         inner join tbl_tamanho on tbl_tamanho.id = tbl_produto_tamanho.id_tamanho 
-    where tbl_produto_tamanho.desconto > 0 order by tbl_produto_tamanho.desconto desc limit 20;`
+    where tbl_produto_tamanho.desconto > 0 and tbl_produto.ativo = true order by tbl_produto_tamanho.desconto desc limit 20;`
 
     const rsPromocoes = await prisma.$queryRawUnsafe(sql)
 
@@ -301,16 +302,27 @@ const selectProdutoById = async (id) => {
 
     const sql = `select * from tbl_produto where id = ${id}`
 
-    const result = prisma.$executeRawUnsafe(sql)
+    const result = await prisma.$queryRawUnsafe(sql)
 
-    if (result) {
-        return true
+    if (result.length > 0) {
+        return result
     } else{
         return false
     }
 }
 
+const addFavorite = async (id, fav) => {
 
+    const sql = `update tbl_produto set favoritos = ${fav + 1} where id = ${id}`
+
+    const result = await prisma.$executeRawUnsafe(sql)
+
+    if (result) { 
+        return true
+    } else{
+        return false
+    }
+}
 
 module.exports = {
     selectAllPizzas,
@@ -329,5 +341,6 @@ module.exports = {
     selectFavoritos,
     selectPromocoes,
     deletarProdutoUpdate,
-    selectProdutoById
+    selectProdutoById,
+    addFavorite
 }

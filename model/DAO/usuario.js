@@ -40,11 +40,8 @@ const updateUser = async function (usuario) {
                                         senha = md5('${usuario.senha}') where id = ${usuario.id}
                                          `;
      
-    // executa o script sql no banco de dados
-    //executeRawUnsafe permite encaminhar uma variavel contendo um script e nao um script direto
     const result = await prisma.$executeRawUnsafe (sql);
     
-    // verifica se o script foi executado com sucesso no BD
         if (result) {
             return true;
         }else
@@ -84,11 +81,9 @@ const selectUserById = async function (id) {
                 let sql = `select  
                                        id,
                                         login,
-                                          senha
+                                        senha
                                             from tbl_usuario
                                                   where id = ${id}`;
-
-    //Criamos um objeto de tipo RecordSet (rsAlunos) para receber os dados de BD atraves do script SQL (select)
     const rsUser = await prisma.$queryRawUnsafe(sql)
 
     if (rsUser.length > 0)
@@ -99,7 +94,7 @@ const selectUserById = async function (id) {
 
 const selectAllUsers = async () => {
 
-    const sql = `select * from tbl_usuario order by id desc`
+    const sql = `select id, login from tbl_usuario order by id desc`
 
     const dados = await prisma.$queryRawUnsafe(sql)
 

@@ -66,8 +66,22 @@ const selectAllMessages = async () => {
     }
 }
 
+const selectMessageById = async (id) => {
+
+    const sql = `select * from tbl_mensagem where id = ${id}`
+
+    const dados = await prisma.$queryRawUnsafe(sql)
+
+    if (dados.length > 0) {
+        return dados
+    } else{
+        return false
+    }
+}
+
 module.exports = {
     selectAllMessages,
     insertMessages,
     deleteMessage,
+    selectMessageById
 }

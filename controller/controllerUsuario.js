@@ -52,7 +52,6 @@ const novoUser = async (user) => {
 
 const updateUser = async (user) => {
 
-    //validacao para o id como campo obrigatorio
     if (user.id == '' || user.id == undefined)
         return {status: 400, MESSAGE: MESSAGE_ERROR.REQUIRED_ID}
         else if (user.login == undefined || user.login == '' || user.senha == '' || user.senha == undefined) {
