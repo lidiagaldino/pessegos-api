@@ -186,6 +186,7 @@ const insertBebida = async (bebida) => {
         const sql = `insert into tbl_bebida(id_produto, id_tipo_bebida, teor_alcoolico) 
                         values(${bebida.id_produto}, ${bebida.id_tipo_bebida}, ${bebida.teor_alcoolico})`
 
+
         const result = await prisma.$executeRawUnsafe(sql)
 
         if (result) {

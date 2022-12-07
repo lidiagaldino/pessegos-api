@@ -79,7 +79,6 @@ const novaPizza = async (pizza) => {
                 }
                 
             } else{
-                console.log('aqi')
                 await produtos.deleteProduto(lastId)
                 return {status: 500, message: MESSAGE_ERROR.INTERNAL_ERROR_DB}
             }
@@ -106,14 +105,23 @@ const novaBebida = async (bebida) => {
             let novaBebida = {
                 id_produto: lastId,
                 id_tamanho: bebida.id_tamanho,
-                id_tipo_pizza: bebida.id_tipo_bebida,
-                teor_alcoolico: bebida.teor_alcoolico
+                id_tipo_bebida: bebida.id_tipo_bebida,
+                teor_alcoolico: bebida.teor_alcoolico,
+                preco: bebida.preco,
+                desconto: bebida.desconto
             }
 
             const inserirBebida = await produtos.insertBebida(novaBebida)
 
             if (inserirBebida) {
-                return {status: 200, message: MESSAGE_SUCCESS.INSERT_ITEM}
+                const inserirBebidaTamanho = await pizzaTamanho.inserirProdutoTamanho(novaBebida)
+
+                if (inserirBebidaTamanho) {
+                    return {status: 200, message: MESSAGE_SUCCESS.INSERT_ITEM}
+                } else{
+                    await produtos.deleteProduto(lastId)
+                    return {status: 500, message: MESSAGE_ERROR.INTERNAL_ERROR_DB}
+                }
             } else{
                 await produtos.deleteProduto(lastId)
                 return {status: 500, message: MESSAGE_ERROR.INTERNAL_ERROR_DB}

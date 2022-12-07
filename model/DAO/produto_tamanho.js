@@ -16,6 +16,7 @@ const inserirProdutoTamanho = async (produto) => {
         const sql = `insert into tbl_produto_tamanho(preco, desconto, id_tamanho, id_produto)
                             values('${produto.preco}', '${produto.desconto}', '${produto.id_tamanho}', '${produto.id_produto}')`
 
+
         const result = await prisma.$executeRawUnsafe(sql)
 
         if (result) {
