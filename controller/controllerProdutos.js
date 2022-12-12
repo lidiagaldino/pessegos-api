@@ -47,7 +47,7 @@ const listarBebidas = async () => {
 
 const novaPizza = async (pizza) => {
 
-    if (pizza.id_tamanho == undefined || pizza.id_tamanho == '' || pizza.id_tipo_pizza == undefined || pizza.id_tipo_pizza == '' || pizza.nome == undefined || pizza.nome == '' || pizza.preco == undefined || pizza.preco == '' || pizza.descricao == undefined || pizza.descricao == '' || pizza.imagem == undefined || pizza.imagem == '' || pizza.desconto == undefined || pizza.desconto == '') {
+    if (pizza.id_tamanho == undefined || pizza.id_tamanho == '' || pizza.id_tipo_pizza == undefined || pizza.id_tipo_pizza == '' || pizza.nome == undefined || pizza.nome == '' || pizza.descricao == undefined || pizza.descricao == '' || pizza.imagem == undefined || pizza.imagem == '' || pizza.desconto == undefined || pizza.desconto == '') {
         return {status: 400, message: MESSAGE_ERROR.REQUIRED_FIELDS}
     }
 
@@ -61,7 +61,6 @@ const novaPizza = async (pizza) => {
             let novaPizza = {
                 id_produto: lastId,
                 id_tamanho: pizza.id_tamanho,
-                preco: pizza.preco,
                 desconto: pizza.desconto,
                 id_tipo_pizza: pizza.id_tipo_pizza
             }
@@ -69,14 +68,18 @@ const novaPizza = async (pizza) => {
             const inserirPizza = await produtos.insertPizza(novaPizza)
 
             if (inserirPizza) {
-                const inserirPizzaTamanho = await pizzaTamanho.inserirProdutoTamanho(novaPizza)
 
-                if (inserirPizzaTamanho) {
-                    return {status: 200, message: MESSAGE_SUCCESS.INSERT_ITEM}
-                } else{
-                    await produtos.deleteProduto(lastId)
-                    return {status: 500, message: MESSAGE_ERROR.INTERNAL_ERROR_DB}
-                }
+                pizza.id_tamanho.forEach(async (item) => {
+                    novaPizza.id_tamanho = item
+                    const inserirPizzaTamanho = await pizzaTamanho.inserirProdutoTamanho(novaPizza)
+
+                    if (!inserirPizzaTamanho) {
+                        await produtos.deleteProduto(lastId)
+                        return {status: 500, message: MESSAGE_ERROR.INTERNAL_ERROR_DB}
+                    }
+                })
+                
+                return {status: 200, message: MESSAGE_SUCCESS.INSERT_ITEM}
                 
             } else{
                 await produtos.deleteProduto(lastId)
@@ -90,7 +93,7 @@ const novaPizza = async (pizza) => {
 
 const novaBebida = async (bebida) => {
 
-    if (bebida.id_tamanho == undefined || bebida.id_tamanho == '' || bebida.id_tipo_bebida == undefined || bebida.id_tipo_bebida == '' || bebida.nome == undefined || bebida.nome == '' || bebida.preco == undefined || bebida.preco == '' || bebida.descricao == undefined || bebida.descricao == '' || bebida.imagem == undefined || bebida.imagem == '' || bebida.desconto == undefined || bebida.desconto == '' || bebida.teor_alcoolico == undefined || bebida.teor_alcoolico == '') {
+    if (bebida.id_tamanho == undefined || bebida.id_tamanho == '' || bebida.id_tipo_bebida == undefined || bebida.id_tipo_bebida == '' || bebida.nome == undefined || bebida.nome == '' || bebida.descricao == undefined || bebida.descricao == '' || bebida.imagem == undefined || bebida.imagem == '') {
         return {status: 400, message: MESSAGE_ERROR.REQUIRED_FIELDS}
     }
 
@@ -107,21 +110,27 @@ const novaBebida = async (bebida) => {
                 id_tamanho: bebida.id_tamanho,
                 id_tipo_bebida: bebida.id_tipo_bebida,
                 teor_alcoolico: bebida.teor_alcoolico,
-                preco: bebida.preco,
                 desconto: bebida.desconto
             }
 
             const inserirBebida = await produtos.insertBebida(novaBebida)
 
             if (inserirBebida) {
-                const inserirBebidaTamanho = await pizzaTamanho.inserirProdutoTamanho(novaBebida)
 
-                if (inserirBebidaTamanho) {
-                    return {status: 200, message: MESSAGE_SUCCESS.INSERT_ITEM}
-                } else{
-                    await produtos.deleteProduto(lastId)
-                    return {status: 500, message: MESSAGE_ERROR.INTERNAL_ERROR_DB}
-                }
+                let inserirBebidaTamanho = false
+
+                bebida.id_tamanho.forEach(async (item) => {
+
+                    novaBebida.id_tamanho = item
+                    inserirBebidaTamanho = await pizzaTamanho.inserirProdutoTamanho(novaBebida)
+                    
+                    if (!inserirBebidaTamanho) {
+                        await produtos.deleteProduto(lastId)
+                        return {status: 500, message: MESSAGE_ERROR.INTERNAL_ERROR_DB}
+                    }
+                }) 
+
+                return {status: 200, message: MESSAGE_SUCCESS.INSERT_ITEM}
             } else{
                 await produtos.deleteProduto(lastId)
                 return {status: 500, message: MESSAGE_ERROR.INTERNAL_ERROR_DB}
