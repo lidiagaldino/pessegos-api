@@ -108,6 +108,9 @@ const buscarUser = async function (id) {
 }
 
 const autenticar = async function (user) {
+
+    const jwt = require('../middleware/jwt.js')
+
     if (user.senha == undefined || user.senha == '' || user.login == undefined || user.senha == '') {
         return {status: 400, message: MESSAGE_ERROR.REQUIRED_FIELDS}
     }
@@ -115,7 +118,9 @@ const autenticar = async function (user) {
     const autenticacao = await newUser.autenticateUser(user)
 
     if (autenticacao) {
-        return {status: 200, message: MESSAGE_SUCCESS.AUTENTICATE_SUCCESS}
+        let tokenUser = await jwt.createJWT(autenticacao[0].id)
+        autenticacao[0].token = tokenUser
+        return {status: 200, message: autenticacao}
     } else{
         return {status: 404, message: MESSAGE_ERROR.AUTENTICATE_ERROR}
     }

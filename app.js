@@ -40,6 +40,22 @@ app.use((request, response, next) => {
 
 const jsonParser = bodyParser.json()
 
+const verifyJWT = async (request, response, next)=>{
+
+    const jwt = require('./middleware/jwt.js')
+
+    let token = request.headers['x-access-token']
+
+    const autenticarToken = await jwt.validateJWT(token)
+
+    if(autenticarToken){
+        next()
+    }else{
+        return response.status(401).end()
+    }
+}
+
+
 // ------------- GET ------------- //
 
 app.get('/v1/tipo/pizza', cors(), async (request, response, next) => {
@@ -142,6 +158,14 @@ app.post('/v1/user/login', cors(), jsonParser, async (request, response, next) =
     response.status(statusCode)
     response.json(message)
 
+})
+
+app.get('/v1/produtos/ativo', cors(), async (request, response, next) => {
+
+    const dadosInativo = await controllerProdutos.listarInativos()
+
+    response.status(dadosInativo.status)
+    response.json(dadosInativo)
 })
 
 // ------------- GET BY ID ------------- //
@@ -332,6 +356,66 @@ app.post('/v1/usuario', cors(), jsonParser, async (request, response, next) => {
 
             statusCode = newUser.status
             message = newUser.message
+
+        } else{
+            statusCode = 400
+            message = MESSAGE_ERROR.EMPTY_BODY
+        }
+    }else{
+        statusCode = 415
+        message = MESSAGE_ERROR.CONTENT_TYPE
+    }
+    
+    response.status(statusCode)
+    response.json(message)
+})
+
+app.post('/v1/tipo/pizza', cors(), jsonParser, async (request, response, next) => {
+
+    let headerContentType = request.headers['content-type']
+    let statusCode
+    let message
+
+    if (headerContentType == 'application/json') {
+        
+        let dadosBody = request.body
+
+        if (JSON.stringify(dadosBody) != '{}') {
+             
+            const newTipo = await controllerTipos.inserirTipoPizza(dadosBody)
+
+            statusCode = newTipo.status
+            message = newTipo.message
+
+        } else{
+            statusCode = 400
+            message = MESSAGE_ERROR.EMPTY_BODY
+        }
+    }else{
+        statusCode = 415
+        message = MESSAGE_ERROR.CONTENT_TYPE
+    }
+    
+    response.status(statusCode)
+    response.json(message)
+})
+
+app.post('/v1/tipo/bebida', cors(), jsonParser, async (request, response, next) => {
+
+    let headerContentType = request.headers['content-type']
+    let statusCode
+    let message
+
+    if (headerContentType == 'application/json') {
+        
+        let dadosBody = request.body
+
+        if (JSON.stringify(dadosBody) != '{}') {
+             
+            const newTipo = await controllerTipos.inserirTipoBebida(dadosBody)
+
+            statusCode = newTipo.status
+            message = newTipo.message
 
         } else{
             statusCode = 400

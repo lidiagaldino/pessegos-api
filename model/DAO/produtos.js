@@ -11,7 +11,7 @@ const prisma = new PrismaClient()
 
 const selectAllPizzas = async () => {
 
-    const sql = `select tbl_tamanho.nome as tamanho, tbl_produto.favoritos, round(tbl_produto_tamanho.preco, 2) as preco, tbl_produto_tamanho.desconto, tbl_produto.nome, tbl_produto.descricao, tbl_produto.imagem, tbl_tipo_pizza.tipo, tbl_produto.id as id_produto, tbl_pizza.id as id_pizza from tbl_produto
+    const sql = `select tbl_tamanho.nome as tamanho, tbl_produto.favoritos, round(tbl_produto_tamanho.preco, 2) as preco, tbl_produto_tamanho.desconto, tbl_produto.nome, tbl_produto.descricao, tbl_produto.imagem, tbl_tipo_pizza.tipo, tbl_produto.id as id_produto, round(tbl_produto_tamanho.preco - (tbl_produto_tamanho.preco / tbl_produto_tamanho.desconto), 2) as preco_desconto, tbl_pizza.id as id_pizza from tbl_produto
 	inner join tbl_pizza on tbl_produto.id = tbl_pizza.id_produto
     inner join tbl_produto_tamanho on tbl_produto_tamanho.id_produto = tbl_produto.id
     inner join tbl_tamanho on tbl_tamanho.id = tbl_produto_tamanho.id_tamanho
@@ -29,7 +29,7 @@ const selectAllPizzas = async () => {
 
 const selectAllBebidas = async () => {
 
-    const sql = `select tbl_tamanho.nome as tamanho, tbl_produto.favoritos, round(tbl_produto_tamanho.preco,2) as preco, tbl_produto_tamanho.desconto, tbl_produto.nome, tbl_produto.descricao, tbl_produto.imagem, tbl_tipo_bebida.tipo, tbl_produto.id as id_produto, tbl_bebida.id as id_bebida, tbl_bebida.teor_alcoolico from tbl_produto
+    const sql = `select tbl_tamanho.nome as tamanho, tbl_produto.favoritos, round(tbl_produto_tamanho.preco,2) as preco, tbl_produto_tamanho.desconto, tbl_produto.nome, tbl_produto.descricao, tbl_produto.imagem, tbl_tipo_bebida.tipo, tbl_produto.id as id_produto, tbl_bebida.id as id_bebida, round(tbl_produto_tamanho.preco - (tbl_produto_tamanho.preco / tbl_produto_tamanho.desconto), 2) as preco_desconto, tbl_bebida.teor_alcoolico from tbl_produto
 	inner join tbl_bebida on tbl_produto.id = tbl_bebida.id_produto
     inner join tbl_produto_tamanho on tbl_produto_tamanho.id_produto = tbl_produto.id
     inner join tbl_tamanho on tbl_tamanho.id = tbl_produto_tamanho.id_tamanho
@@ -286,9 +286,9 @@ const selectPromocoes = async () => {
     }
 }
 
-const deletarProdutoUpdate = async (id) => {
+const deletarProdutoUpdate = async (id, boolean) => {
 
-    const sql = `update tbl_produto set ativo = false where id = ${id}`
+    const sql = `update tbl_produto set ativo = ${boolean} where id = ${id}`
 
     const result = await prisma.$executeRawUnsafe(sql)
 
@@ -325,6 +325,19 @@ const addFavorite = async (id, fav) => {
     }
 }
 
+const getAllInativos = async () => {
+
+    const sql = `select * from tbl_produto where ativo = false`
+
+    const result = await prisma.$queryRawUnsafe(sql)
+
+    if (result.length > 0) {
+        return result
+    } else{
+        return false
+    }
+}
+
 module.exports = {
     selectAllPizzas,
     selectAllBebidas,
@@ -343,5 +356,6 @@ module.exports = {
     selectPromocoes,
     deletarProdutoUpdate,
     selectProdutoById,
-    addFavorite
+    addFavorite,
+    getAllInativos
 }

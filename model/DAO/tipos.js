@@ -23,6 +23,42 @@ const selectAllTiposPizza = async () => {
     }
 }
 
+const addTipoPizza = async (tipo) => {
+
+    try {
+        
+        const sql = `insert into tbl_tipo_pizza(tipo) values ('${tipo.nome}')`
+
+        const result = await prisma.$executeRawUnsafe(sql)
+
+        if (result) {
+            return true
+        } else{
+            return false
+        }
+    } catch (error) {
+        return false
+    }
+}
+
+const addTipoBebida = async (tipo) => {
+
+    try {
+        
+        const sql = `insert into tbl_tipo_bebida(tipo) values ('${tipo.nome}')`
+
+        const result = await prisma.$executeRawUnsafe(sql)
+
+        if (result) {
+            return true
+        } else{
+            return false
+        }
+    } catch (error) {
+        return false
+    }
+}
+
 const selectAllTiposBebidas = async () => {
 
     const sql = `select * from tbl_tipo_bebida`
@@ -38,5 +74,7 @@ const selectAllTiposBebidas = async () => {
 
 module.exports = {
     selectAllTiposPizza,
-    selectAllTiposBebidas
+    selectAllTiposBebidas,
+    addTipoPizza,
+    addTipoBebida
 }
