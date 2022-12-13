@@ -88,7 +88,7 @@ const updateTamanho = async (produto) => {
 
     try {
         
-        const sql = `update tbl_produto_tamanho set preco = ${produto.preco}, desconto = ${produto.desconto}, id_produto = ${produto.id_produto}, id_tamanho = ${produto.id_tamanho} where id = ${produto.id_tamanho_pizza}`
+        const sql = `update tbl_produto_tamanho set preco = ${produto.preco}, desconto = ${produto.desconto} where id_produto = ${produto.id_produto} and id_tamanho = ${produto.id_tamanho}`
 
         const result = await prisma.$executeRawUnsafe(sql)
 
@@ -202,7 +202,7 @@ const insertBebida = async (bebida) => {
 
 const selectPizzaById = async (id) => {
 
-    const sql = `select tbl_produto.nome, tbl_produto.imagem, tbl_produto.descricao, tbl_produto_tamanho.desconto, tbl_produto.favoritos, round(tbl_produto_tamanho.preco, 2) as preco, tbl_tamanho.nome as tamanho, tbl_tipo_pizza.tipo, tbl_pizza.id as id_pizza, tbl_produto.id as id_produto, tbl_produto_tamanho.id as id_tamanho  
+    const sql = `select tbl_produto.nome, tbl_produto.imagem, tbl_produto.descricao, tbl_produto_tamanho.desconto, tbl_produto.favoritos, round(tbl_produto_tamanho.preco, 2) as preco, tbl_tamanho.nome as tamanho, tbl_tamanho.id as id_tamanho, tbl_tipo_pizza.tipo, tbl_pizza.id as id_pizza, tbl_produto.id as id_produto, tbl_produto_tamanho.id as id_tamanho_pizza  
     from tbl_pizza 
         inner join tbl_produto on tbl_pizza.id_produto = tbl_produto.id 
         inner join tbl_produto_tamanho on tbl_produto_tamanho.id_produto = tbl_produto.id
@@ -221,7 +221,7 @@ const selectPizzaById = async (id) => {
 
 const selectBebidaById = async (id) => {
 
-    const sql = `select tbl_produto.nome, tbl_produto.imagem, tbl_produto.descricao, tbl_produto_tamanho.desconto, tbl_produto.favoritos, round(tbl_produto_tamanho.preco, 2) as preco, tbl_tamanho.nome as tamanho, tbl_tipo_bebida.tipo, tbl_bebida.id as id_bebida, tbl_produto.id as id_produto, tbl_produto_tamanho.id as id_tamanho  
+    const sql = `select tbl_produto.nome, tbl_produto.imagem, tbl_produto.descricao, tbl_produto_tamanho.desconto, tbl_produto.favoritos, round(tbl_produto_tamanho.preco, 2) as preco, tbl_tamanho.nome as tamanho, tbl_tamanho.id as id_tamanho, tbl_tipo_bebida.tipo, tbl_bebida.id as id_bebida, tbl_produto.id as id_produto, tbl_produto_tamanho.id as id_tamanho_bebida  
     from tbl_bebida 
         inner join tbl_produto on tbl_bebida.id_produto = tbl_produto.id 
         inner join tbl_produto_tamanho on tbl_produto_tamanho.id_produto = tbl_produto.id

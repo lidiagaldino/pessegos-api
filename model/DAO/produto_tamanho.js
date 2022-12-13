@@ -30,11 +30,31 @@ const inserirProdutoTamanho = async (produto) => {
     }
 }
 
-const deleteProdutoTamanho = async (id) => {
+const inserirProdutoTamanhoProdutoExistente = async (produto) => {
 
-    const sql = `delete from tbl_produto_tamanho where id = ${id}`
+    try{
 
-    const result = prisma.$executeRawUnsafe(sql)
+        const sql = `insert into tbl_produto_tamanho(preco, desconto, id_tamanho, id_produto)
+                            values('${produto.preco}', '${produto.desconto}', '${produto.id_tamanho}', '${produto.id}')`
+
+        const result = await prisma.$executeRawUnsafe(sql)
+
+        if (result) {
+            return true
+        } else{
+            return false
+        }
+
+    } catch(error){
+        return false
+    }
+}
+
+const deleteProdutoTamanho = async (id, idTamanho) => {
+
+    const sql = `delete from tbl_produto_tamanho where id_produto = ${id} and id_tamanho = ${idTamanho};`
+
+    const result = await prisma.$executeRawUnsafe(sql)
 
     if (result) {
         return true
@@ -45,5 +65,6 @@ const deleteProdutoTamanho = async (id) => {
 
 module.exports = {
     inserirProdutoTamanho,
-    deleteProdutoTamanho
+    deleteProdutoTamanho,
+    inserirProdutoTamanhoProdutoExistente
 }

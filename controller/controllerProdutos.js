@@ -144,7 +144,7 @@ const novaBebida = async (bebida) => {
 
 const atualizarPizza = async (pizza) => {
 
-    if (pizza.id_produto == undefined || pizza.id_produto == '' || pizza.id_tamanho == undefined || pizza.id_tamanho == '' || pizza.id_tipo_pizza == undefined || pizza.id_tipo_pizza == '' || pizza.nome == undefined || pizza.nome == '' || pizza.preco == undefined || pizza.preco == '' || pizza.descricao == undefined || pizza.descricao == '' || pizza.imagem == undefined || pizza.imagem == '' || pizza.desconto == undefined || pizza.desconto == '') {
+    if (pizza.id_produto == undefined || pizza.id_produto == '' || pizza.id_tipo_pizza == undefined || pizza.id_tipo_pizza == '' || pizza.nome == undefined || pizza.nome == '' || pizza.descricao == undefined || pizza.descricao == '' || pizza.imagem == undefined || pizza.imagem == '') {
         return {status: 400, message: MESSAGE_ERROR.REQUIRED_FIELDS}
     } else if(pizza.id_pizza == '' || pizza.id_pizza == undefined){
         return {status: 400, message: MESSAGE_ERROR.REQUIRED_ID}
@@ -156,11 +156,29 @@ const atualizarPizza = async (pizza) => {
         
         const resultProduto = await produtos.updateProduto(pizza)
 
-        const resultTamanho = await produtos.updateTamanho(pizza)
+        console.log(resultProduto);
+
+        let resultTamanho = 0
+
+        let erro = false
+
+        pizza.preco.forEach(async (item) => {
+            const produto = {
+                preco: item.preco,
+                desconto: item.desconto,
+                id_produto: pizza.id_produto,
+                id_tamanho: item.id_tamanho
+            }
+            resultTamanho = await produtos.updateTamanho(produto)
+
+            if (resultTamanho) {
+                erro = true
+            }
+        })
             
         const resultPizza = await produtos.updatePizza(pizza)
 
-        if (resultPizza || resultProduto || resultTamanho) {
+        if (resultPizza || resultProduto || erro) {
             return {status: 200, message: MESSAGE_SUCCESS.UPDATE_ITEM}
         }else{
             return {message: MESSAGE_ERROR.INTERNAL_SERVER_ERROR, status: 500}
@@ -172,23 +190,39 @@ const atualizarPizza = async (pizza) => {
 
 const atualizarBebida = async (bebida) => {
 
-    if (bebida.id_produto == undefined || bebida.id_produto == '' || bebida.id_tamanho == undefined || bebida.id_tamanho == '' || bebida.id_tipo_bebida == undefined || bebida.id_tipo_bebida == '' || bebida.nome == undefined || bebida.nome == '' || bebida.preco == undefined || bebida.preco == '' || bebida.descricao == undefined || bebida.descricao == '' || bebida.imagem == undefined || bebida.imagem == '') {
+    if (bebida.id_produto == undefined || bebida.id_produto == '' || bebida.id_tipo_bebida == undefined || bebida.id_tipo_bebida == '' || bebida.nome == undefined || bebida.nome == '' || bebida.preco == undefined || bebida.preco == '' || bebida.descricao == undefined || bebida.descricao == '' || bebida.imagem == undefined || bebida.imagem == '') {
         return {status: 400, message: MESSAGE_ERROR.REQUIRED_FIELDS}
     } else if(bebida.id_bebida == '' || bebida.id_bebida == undefined){
         return {status: 400, message: MESSAGE_ERROR.REQUIRED_ID}
     }
 
-    const verificar = await produtos.selectBebidaById(bebida.id_bebida)
+    const verificar = await produtos.selectBebidaById(bebida.id_bebida);
 
     if (verificar) {
         
         const resultProduto = await produtos.updateProduto(bebida)
 
-        const resultTamanho = await produtos.updateTamanho(bebida)
+        let resultTamanho = 0
+
+        let erro = false
+
+        bebida.preco.forEach(async (item) => {
+            const produto = {
+                preco: item.preco,
+                desconto: item.desconto,
+                id_produto: bebida.id_produto,
+                id_tamanho: item.id_tamanho
+            }
+            resultTamanho = await produtos.updateTamanho(produto)
+
+            if (resultTamanho) {
+                erro = true
+            }
+        })
 
         const resultBebida = await produtos.updateBebida(bebida)
 
-        if (resultBebida || resultProduto || resultTamanho) {
+        if (resultBebida || resultProduto || erro) {
             return {status: 200, message: MESSAGE_SUCCESS.UPDATE_ITEM}
         }else{
             return {message: MESSAGE_ERROR.INTERNAL_SERVER_ERROR, status: 500}
@@ -328,6 +362,49 @@ const listarInativos = async () => {
     return produtosJSON
 }
 
+const inserirTamanho = async (produto) => {
+
+    if (produto.preco == undefined || produto.preco == '' ||produto.desconto == undefined || produto.desconto == '' || produto.id == undefined || produto.id == '' || produto.id_tamanho == undefined || produto.id_tamanho == '') {
+        return {status: 400, message: MESSAGE_ERROR.REQUIRED_FIELDS}
+    }
+
+    const verificar = await produtos.selectProdutoById(produto.id)
+
+    if (verificar) {
+        
+        const add = await pizzaTamanho.inserirProdutoTamanhoProdutoExistente(produto)
+
+        if (add) {
+            return {status: 200, message: MESSAGE_SUCCESS.INSERT_ITEM}
+        } else{
+            return {status: 500, message: MESSAGE_ERROR.INTERNAL_ERROR_DB}
+        }
+    }else{
+        return {status: 404, message: MESSAGE_ERROR.NOT_FOUND_DB}
+    }
+}
+
+const deletarProdutoTamanho = async (id, idTamanho) => {
+
+    if (id == undefined || id == '' ||  id == undefined || id == '') {
+        return {status: 400, message: MESSAGE_ERROR.REQUIRED_ID}
+    }
+
+    const verificar = await produtos.selectProdutoById(id)
+
+    if (verificar) {
+        
+        const deletar = await pizzaTamanho.deleteProdutoTamanho(id, idTamanho)
+
+        if (deletar) {
+            return {status: 200, message: MESSAGE_SUCCESS.DELETE_ITEM}
+        } else{
+            return {status: 500, message: MESSAGE_ERROR.INTERNAL_ERROR_DB}
+        }
+    }
+
+}
+
 module.exports = {
     listarPizzas,
     listarBebidas,
@@ -341,5 +418,7 @@ module.exports = {
     listarPromocoes,
     deletarProduto,
     adicionarFavorito,
-    listarInativos
+    listarInativos,
+    inserirTamanho,
+    deletarProdutoTamanho
 }

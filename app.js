@@ -430,6 +430,45 @@ app.post('/v1/tipo/bebida', cors(), jsonParser, async (request, response, next) 
     response.json(message)
 })
 
+app.post('/v1/produto/tamanho/:id', cors(), jsonParser, async function(request, response){
+
+    let headerContentType = request.headers['content-type']
+    let statusCode
+    let message
+
+    let id = request.params.id
+
+    if (headerContentType == 'application/json') {
+        
+        let dadosBody = request.body
+
+        if (JSON.stringify(dadosBody) != '{}') {
+
+            if (id != undefined && id != '') {
+                
+                dadosBody.id = id
+
+                const newTamanho = await controllerProdutos.inserirTamanho(dadosBody)
+
+                statusCode = newTamanho.status
+                message = newTamanho.message
+            }
+             
+            
+
+        } else{
+            statusCode = 400
+            message = MESSAGE_ERROR.EMPTY_BODY
+        }
+    }else{
+        statusCode = 415
+        message = MESSAGE_ERROR.CONTENT_TYPE
+    }
+    
+    response.status(statusCode)
+    response.json(message)
+})
+
 // ------------- DELETE ------------- //
 
 app.delete('/v1/mensagem/:id', cors(), jsonParser, async function(request, response){
@@ -488,6 +527,30 @@ app.delete('/v1/usuario/:id', cors(), jsonParser, async function(request, respon
     response.status(statusCode);
     response.json(message)
 });
+
+app.delete('/v1/produto/tamanho/:id/:idTamanho', cors(), jsonParser, async function(request, response, next){
+
+    let statusCode;
+    let message;
+
+    let id = request.params.id
+    let idTamanho = request.params.idTamanho
+
+    if (id != '' && id != undefined && idTamanho != '' && idTamanho != undefined){
+                
+        const deletarProdutoTamanho = await controllerProdutos.deletarProdutoTamanho(id, idTamanho);
+
+        statusCode = deletarProdutoTamanho.status;
+        message = deletarProdutoTamanho.message;
+    }else{
+        statusCode = 400;
+        message = MESSAGE_ERROR.REQUIRED_ID
+    } 
+
+
+    response.status(statusCode);
+    response.json(message)
+})
 
 app.put('/v1/produtos/:id', cors(), jsonParser, async function(request, response){
     let statusCode;
